@@ -10,13 +10,14 @@ import sys
 
 def main(fn):
     """Call fn with command line arguments.  Used as a decorator.
-
+    使用命令行参数调用 fn。用作装饰器。
+    main 装饰器标记启动程序的函数。
     The main decorator marks the function that starts a program. For example,
 
     @main
     def my_run_function():
         # function body
-
+    使用它来代替典型的 __name__ == "__main__" 判断
     Use this instead of the typical __name__ == "__main__" predicate.
     """
     if inspect.stack()[1][0].f_locals['__name__'] == '__main__':
@@ -28,7 +29,7 @@ _PREFIX = ''
 def trace(fn):
     """A decorator that prints a function's name, its arguments, and its return
     values each time the function is called. For example,
-
+    一个装饰器，每次调用函数时打印函数名、参数和返回值。
     @trace
     def compute_something(x, y):
         # function body
@@ -72,6 +73,11 @@ def interact(msg=None):
     In Windows:
       <Control>-Z <Enter> exits the interactive session and returns to normal
       execution.
+    在当前环境中启动一个交互式解释器会话。
+    在 Unix 上：
+      <Control>-D 退出交互式会话并返回到正常执行。
+    在 Windows 上：
+      <Control>-Z <Enter> 退出交互式会话并返回到正常执行。
     """
     # evaluate commands in current namespace
     frame = inspect.currentframe().f_back

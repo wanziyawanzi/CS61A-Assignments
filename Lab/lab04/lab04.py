@@ -1,18 +1,18 @@
 def divide(quotients, divisors):
     """Return a dictonary in which each quotient q is a key for the list of
     divisors that it divides evenly.
-
+    返回一个字典，其中每个商 q 作为键，对应一个它能整除的除数列表。
     >>> divide([3, 4, 5], [8, 9, 10, 11, 12])
     {3: [9, 12], 4: [8, 12], 5: [10]}
     >>> divide(range(1, 5), range(20, 25))
     {1: [20, 21, 22, 23, 24], 2: [20, 22, 24], 3: [21, 24], 4: [20, 24]}
     """
-    return {____: ____ for ____ in ____}
+    return { q: [x for x in divisors if x%q == 0] for q in quotients}
 
 
 def buy(fruits_to_buy, prices, total_amount):
     """Print ways to buy some of each fruit so that the sum of prices is amount.
-
+    打印购买每种水果各若干份、使价格总和为 amount 的所有方案。
     >>> prices = {'oranges': 4, 'apples': 3, 'bananas': 2, 'kiwis': 9}
     >>> buy(['apples', 'oranges', 'bananas'], prices, 12)  # We can only buy apple, orange, and banana, but not kiwi
     [2 apples][1 orange][1 banana]
@@ -29,10 +29,10 @@ def buy(fruits_to_buy, prices, total_amount):
             print(cart)
         elif fruits and amount > 0:
             fruit = fruits[0]
-            price = ____
-            for k in ____:
+            price = prices[fruit]
+            for k in range(1,(amount-(sum(prices[fru] for fru in fruits)-price))//price +1 ):
                 # Hint: The display function will help you add fruit to the cart.
-                add(____, ____, ____)
+                add(fruits[1:], amount-k*price, cart+display(fruit,k))
     add(fruits_to_buy, total_amount, '')
 
 
@@ -67,13 +67,18 @@ def distance(city_a, city_b):
     5.0
     """
     "*** YOUR CODE HERE ***"
+    dx = abs(get_lat(city_a)-get_lat(city_b))
+    dy = abs(get_lon(city_a)-get_lon(city_b))
+    return sqrt(dx*dx+dy*dy)
 
 def closer_city(lat, lon, city_a, city_b):
     """
     Returns the name of either city_a or city_b, whichever is closest to
     coordinate (lat, lon). If the two cities are the same distance away
     from the coordinate, consider city_b to be the closer city.
-
+    返回 city_a 或 city_b 中距离坐标 (lat, lon) 更近的那个城市的名称。
+    如果两个城市与该坐标的距离相同，则认为 city_b 是更近的城市。
+    
     >>> berkeley = make_city('Berkeley', 37.87, 112.26)
     >>> stanford = make_city('Stanford', 34.05, 118.25)
     >>> closer_city(38.33, 121.44, berkeley, stanford)
@@ -84,6 +89,12 @@ def closer_city(lat, lon, city_a, city_b):
     'Bucharest'
     """
     "*** YOUR CODE HERE ***"
+    city = make_city('city',lat,lon)
+    distance_a = distance(city,city_a)
+    distance_b = distance(city,city_b)
+    if distance_a < distance_b:
+        return get_name(city_a)
+    else: return get_name(city_b)
 
 def check_city_abstraction():
     """
@@ -109,6 +120,7 @@ def check_city_abstraction():
     """
 
 # Treat all the following code as being behind an abstraction layer,
+# 将以下所有代码都视为位于抽象层之后。lat 纬度,lon 经度
 # you shouldn't need to look at it.
 def make_city(name, lat, lon):
     """

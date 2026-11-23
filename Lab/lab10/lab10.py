@@ -14,20 +14,20 @@ def calc_eval(exp):
     3
     """
     if isinstance(exp, Pair):
-        operator = ____________ # UPDATE THIS FOR Q2, e.g (+ 1 2), + is the operator
-        operands = ____________ # UPDATE THIS FOR Q2, e.g (+ 1 2), 1 and 2 are operands
+        operator = exp.first #为 Q2 更新此处，例如 (+ 1 2)，+ 是运算符 UPDATE THIS FOR Q2, e.g (+ 1 2), + is the operator
+        operands = exp.rest #为 Q2 更新此处，例如 (+ 1 2)，1 和 2 是操作数 UPDATE THIS FOR Q2, e.g (+ 1 2), 1 and 2 are operands
         if operator == 'and': # and expressions
             return eval_and(operands)
         elif operator == 'define': # define expressions
             return eval_define(operands)
         else: # Call expressions
-            return calc_apply(___________, ___________) # UPDATE THIS FOR Q2, what is type(operator)?
-    elif exp in OPERATORS:   # Looking up procedures
+            return calc_apply(OPERATORS[operator], operands) #为 Q2 更新此处，type(operator) 是什么？ UPDATE THIS FOR Q2, what is type(operator)?
+    elif exp in OPERATORS:   #处理符号表达式的分支 查找过程 Looking up procedures
         return OPERATORS[exp]
-    elif isinstance(exp, int) or isinstance(exp, bool):   # Numbers and booleans
+    elif isinstance(exp, int) or isinstance(exp, bool):   #数字和布尔值 Numbers and booleans
         return exp
-    elif _________________: # CHANGE THIS CONDITION FOR Q4 where are variables stored?
-        return _________________ # UPDATE THIS FOR Q4, how do you access a variable?
+    elif exp in bindings.keys(): #为 Q4 修改此条件，变量存储在哪里？ CHANGE THIS CONDITION FOR Q4 where are variables stored?
+        return bindings[exp] #为 Q4 更新此处，如何访问变量？ UPDATE THIS FOR Q4, how do you access a variable?
 
 def calc_apply(op, args):
     return op(args)
@@ -52,6 +52,14 @@ def floor_div(args):
     20
     """
     "*** YOUR CODE HERE ***"
+    if args.rest == nil:
+        return args.first
+    elif isinstance(args.rest.first,Pair) and not isinstance(args.first,Pair):
+        return floor_div(Pair(args.first//calc_eval(args.rest.first), args.rest.rest))
+    elif not isinstance(args.rest.first,Pair) and isinstance(args.first,Pair):
+        return floor_div(Pair(calc_eval(args.first)//args.rest.first, args.rest.rest))
+    else:
+        return floor_div(Pair(args.first//args.rest.first, args.rest.rest))
 
 scheme_t = True   # Scheme's #t
 scheme_f = False  # Scheme's #f
@@ -74,6 +82,22 @@ def eval_and(expressions):
     True
     """
     "*** YOUR CODE HERE ***"
+    if expressions is nil:
+        return True
+    elif expressions.first is scheme_f:    #false
+        return False
+    elif expressions.rest == nil:      #只有一个元素
+        if not isinstance(expressions.first,Pair):  #int
+            return expressions.first
+        else:  #operator
+            return calc_eval(expressions.first)
+    else:
+        if not isinstance(expressions.rest.first,Pair):  #int
+            return expressions.rest.first
+        else:  #operator
+            return calc_eval(expressions.rest.first)
+        
+    
 
 bindings = {}
 
@@ -93,12 +117,23 @@ def eval_define(expressions):
     2
     """
     "*** YOUR CODE HERE ***"
+    if not isinstance(expressions.rest.first,Pair):
+        if expressions.rest.first in OPERATORS.keys():
+            bindings[expressions.first] = OPERATORS[expressions.rest.first]
+            OPERATORS[expressions.first] = OPERATORS[expressions.rest.first]
+        elif expressions.rest.first in bindings.keys():
+            bindings[expressions.first] = bindings[expressions.rest.first]
+        else: 
+            bindings[expressions.first] = expressions.rest.first
+    else:
+        bindings[expressions.first] = calc_eval(expressions.rest)
+    return expressions.first
 
 OPERATORS = { "//": floor_div, "+": addition, "-": subtraction, "*": multiplication, "/": division }
 
 class Pair:
     """A pair has two instance attributes: first and rest. rest must be a Pair or nil
-
+        一个 pair 有两个实例属性：first 和 rest。rest 必须是一个 Pair 或 nil。
     >>> s = Pair(1, Pair(2, nil))
     >>> s
     Pair(1, Pair(2, nil))
@@ -139,7 +174,8 @@ class Pair:
         return self.first == p.first and self.rest == p.rest
 
     def map(self, fn):
-        """Return a Scheme list after mapping Python function FN to SELF."""
+        """Return a Scheme list after mapping Python function FN to SELF.
+        将 Python 函数 FN 映射到 SELF 后返回一个 Scheme 列表"""
         mapped = fn(self.first)
         if self.rest is nil or isinstance(self.rest, Pair):
             return Pair(mapped, self.rest.map(fn))
@@ -161,5 +197,5 @@ class nil:
     def map(self, fn):
         return self
 
-nil = nil() # Assignment hides the nil class; there is only one instance
+nil = nil() # 赋值隐藏了 nil 类；只有一个实例 Assignment hides the nil class; there is only one instance
 

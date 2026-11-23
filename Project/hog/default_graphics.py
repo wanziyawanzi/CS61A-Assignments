@@ -1,4 +1,4 @@
-# Default dice for the Hog game. These can be overriden by students.
+# Default dice for the Hog game. These can be overriden by students.Hog 游戏的默认骰子。这些可以被学生覆盖。
 
 dice = [
     "",

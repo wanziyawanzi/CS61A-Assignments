@@ -12,20 +12,21 @@ import scheme_forms
 
 def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     """Evaluate Scheme expression EXPR in Frame ENV.
-
+    在环境帧 ENV 中求值 Scheme 表达式 EXPR。
+    
     >>> expr = read_line('(+ 2 2)')
     >>> expr
     Pair('+', Pair(2, Pair(2, nil)))
     >>> scheme_eval(expr, create_global_frame())
     4
     """
-    # Evaluate atoms
+    # Evaluate atoms 对原子（atoms）进行求值
     if scheme_symbolp(expr):
         return env.lookup(expr)
     elif self_evaluating(expr):
         return expr
 
-    # All non-atomic expressions are lists (combinations)
+    # All non-atomic expressions are lists (combinations) 所有非原子表达式都是列表（组合）
     if not scheme_listp(expr):
         raise SchemeError('malformed list: {0}'.format(repl_str(expr)))
     first, rest = expr.first, expr.rest
@@ -34,31 +35,47 @@ def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     else:
         # BEGIN PROBLEM 3
         "*** YOUR CODE HERE ***"
+        proc = scheme_eval(first,env) 
+        args = rest.map(lambda x: scheme_eval(x,env))
+        return scheme_apply(proc,args,env)
         # END PROBLEM 3
 
 def scheme_apply(procedure, args, env):
-    """Apply Scheme PROCEDURE to argument values ARGS (a Scheme list) in
-    Frame ENV, the current environment."""
+    """Apply Scheme PROCEDURE to argument values ARGS (a Scheme list) inFrame ENV, the current environment.
+    在当前环境帧 ENV 中，将 Scheme 过程 PROCEDURE 应用于参数值 ARGS（一个 Scheme 列表）。"""
+    
     validate_procedure(procedure)
     if not isinstance(env, Frame):
        assert False, "Not a Frame: {}".format(env)
     if isinstance(procedure, BuiltinProcedure):
         # BEGIN PROBLEM 2
         "*** YOUR CODE HERE ***"
+        result = []
+        lst = args
+        while lst is not nil:
+            result.append(lst.first)
+            lst = lst.rest
+        if procedure.need_env:
+            result.append(env)
         # END PROBLEM 2
         try:
             # BEGIN PROBLEM 2
             "*** YOUR CODE HERE ***"
+            return procedure.py_func(*result)
             # END PROBLEM 2
         except TypeError as err:
             raise SchemeError('incorrect number of arguments: {0}'.format(procedure))
     elif isinstance(procedure, LambdaProcedure):
         # BEGIN PROBLEM 9
         "*** YOUR CODE HERE ***"
+        new_env = procedure.env.make_child_frame(procedure.formals,args)
+        return eval_all(procedure.body,new_env)
         # END PROBLEM 9
     elif isinstance(procedure, MuProcedure):
         # BEGIN PROBLEM 11
         "*** YOUR CODE HERE ***"
+        new_env = env.make_child_frame(procedure.formals,args)
+        return eval_all(procedure.body,new_env)
         # END PROBLEM 11
     else:
         assert False, "Unexpected procedure: {}".format(procedure)
@@ -66,7 +83,9 @@ def scheme_apply(procedure, args, env):
 def eval_all(expressions, env):
     """Evaluate each expression in the Scheme list EXPRESSIONS in
     Frame ENV (the current environment) and return the value of the last.
-
+    在环境帧 ENV（当前环境）中对 Scheme 列表 EXPRESSIONS 中的每个表达式进行求值，
+    并返回最后一个表达式的值。
+    
     >>> eval_all(read_line("(1)"), create_global_frame())
     1
     >>> eval_all(read_line("(1 2)"), create_global_frame())
@@ -79,7 +98,12 @@ def eval_all(expressions, env):
     2
     """
     # BEGIN PROBLEM 6
-    return scheme_eval(expressions.first, env) # replace this with lines of your own code
+    pair = expressions
+    last = None
+    while pair is not nil:
+        last = scheme_eval(pair.first, env)
+        pair = pair.rest    
+    return last # replace this with lines of your own code
     # END PROBLEM 6
 
 

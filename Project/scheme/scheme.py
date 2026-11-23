@@ -20,7 +20,9 @@ from ucb import main, trace
 
 def read_eval_print_loop(next_line, env, interactive=False, quiet=False,
                          startup=False, load_files=(), report_errors=False):
-    """Read and evaluate input until an end of file or keyboard interrupt."""
+    """Read and evaluate input until an end of file or keyboard interrupt.
+    读取并求值输入，直到遇到文件结束（EOF）或键盘中断 """
+    
     if startup:
         for filename in load_files:
             scheme_load(filename, True, env)
@@ -58,12 +60,17 @@ def read_eval_print_loop(next_line, env, interactive=False, quiet=False,
 def add_builtins(frame, funcs_and_names):
     """Enter bindings in FUNCS_AND_NAMES into FRAME, an environment frame,
     as built-in procedures. Each item in FUNCS_AND_NAMES has the form
-    (NAME, PYTHON-FUNCTION, INTERNAL-NAME)."""
+    (NAME, PYTHON-FUNCTION, INTERNAL-NAME).
+    将 FUNCS_AND_NAMES 中的绑定作为内置过程输入到 FRAME（一个环境帧）中。
+    FUNCS_AND_NAMES 中的每一项都具有以下形式：(NAME, PYTHON-FUNCTION, INTERNAL-NAME) """
+    
     for name, py_func, proc_name, need_env in funcs_and_names:
         frame.define(name, BuiltinProcedure(py_func, name=proc_name, need_env=need_env))
 
 def create_global_frame():
-    """Initialize and return a single-frame environment with built-in names."""
+    """Initialize and return a single-frame environment with built-in names.
+    初始化并返回一个包含内置名称的单帧环境 """
+    
     env = Frame(None)
     env.define('eval',
                BuiltinProcedure(scheme_eval, True, 'eval'))

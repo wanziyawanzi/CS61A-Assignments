@@ -14,10 +14,10 @@ HW_SOURCE_FILE=__file__
 
 def product(n, term):
     """Return the product of the first n terms in a sequence.
-
-    n: a positive integer
+        返回序列中前 n 项的乘积。
+    n: a positive integer 一个正整数
     term:  a function that takes one argument to produce the term
-
+            一个接受一个参数并产生该项的函数
     >>> product(3, identity)  # 1 * 2 * 3
     6
     >>> product(5, identity)  # 1 * 2 * 3 * 4 * 5
@@ -32,13 +32,20 @@ def product(n, term):
     162
     """
     "*** YOUR CODE HERE ***"
+    i,total=1,1
+    while i <= n:
+        total *= term(i)
+        i+=1
+    return total
 
 
 def accumulate(fuse, start, n, term):
     """Return the result of fusing together the first n terms in a sequence 
     and start.  The terms to be fused are term(1), term(2), ..., term(n). 
     The function fuse is a two-argument commutative & associative function.
-
+    返回将序列中前 n 项与 start 融合在一起的结果。
+    要融合的项是 term(1)、term(2)、……、term(n)。
+    函数 fuse 是一个接受两个参数、满足交换律和结合律的函数。
     >>> accumulate(add, 0, 5, identity)  # 0 + 1 + 2 + 3 + 4 + 5
     15
     >>> accumulate(add, 11, 5, identity) # 11 + 1 + 2 + 3 + 4 + 5
@@ -54,27 +61,36 @@ def accumulate(fuse, start, n, term):
     19
     """
     "*** YOUR CODE HERE ***"
+    #盲点：把‘累计初始值’默认成具体运算的单元，没把start识别为累加器的起点
+    i = 1
+    acc = start
+    while  i <= n:
+        acc = fuse(acc,term(i))
+        i += 1
+    return acc
+     
 
 
 def summation_using_accumulate(n, term):
     """Returns the sum: term(1) + ... + term(n), using accumulate.
-
+        使用 accumulate返回和: term(1) + ... + term(n)
     >>> summation_using_accumulate(5, square) # square(1) + square(2) + ... + square(4) + square(5)
     55
     >>> summation_using_accumulate(5, triple) # triple(1) + triple(2) + ... + triple(4) + triple(5)
     45
     >>> # This test checks that the body of the function is just a return statement.
+    >>> # 这个测试检查函数体是否只是一个 return 语句
     >>> import inspect, ast
     >>> [type(x).__name__ for x in ast.parse(inspect.getsource(summation_using_accumulate)).body[0].body]
     ['Expr', 'Return']
     """
-    return ____
+    return accumulate(add,0,n,term)
 
 
 def product_using_accumulate(n, term):
     """Returns the product: term(1) * ... * term(n), using accumulate.
-
-    >>> product_using_accumulate(4, square) # square(1) * square(2) * square(3) * square()
+        使用 accumulate 返回乘积: term(1) * ... * term(n)
+    >>> product_using_accumulate(4, square) # square(1) * square(2) * square(3) * square(4)
     576
     >>> product_using_accumulate(6, triple) # triple(1) * triple(2) * ... * triple(5) * triple(6)
     524880
@@ -83,12 +99,12 @@ def product_using_accumulate(n, term):
     >>> [type(x).__name__ for x in ast.parse(inspect.getsource(product_using_accumulate)).body[0].body]
     ['Expr', 'Return']
     """
-    return ____
+    return accumulate(mul,1,n,term)
 
 
 def make_repeater(f, n):
     """Returns the function that computes the nth application of f.
-
+        返回一个函数，该函数计算 f 应用 n 次的结果
     >>> add_three = make_repeater(increment, 3)
     >>> add_three(5)
     8
@@ -100,4 +116,13 @@ def make_repeater(f, n):
     390625
     """
     "*** YOUR CODE HERE ***"
+    #逐步提供参数，从而创建更小、更专注的函数
+    def term(x):
+        i = 1
+        acc=f(x)
+        while i < n:
+            acc = f(acc)
+            i += 1 
+        return acc
+    return term 
 

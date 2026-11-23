@@ -41,7 +41,8 @@ class Pair:
         return self.first == p.first and self.rest == p.rest
 
     def map(self, fn):
-        """Return a Scheme list after mapping Python function FN to SELF."""
+        """Return a Scheme list after mapping Python function FN to SELF.
+        在将 Python 函数 FN 映射到 SELF 后，返回一个 Scheme 列表。"""
         mapped = fn(self.first)
         if self.rest is nil or isinstance(self.rest, Pair):
             return Pair(mapped, self.rest.map(fn))
@@ -49,7 +50,8 @@ class Pair:
             raise TypeError('ill-formed list (cdr is a promise)')
 
     def flatmap(self, fn):
-        """Return a Scheme list after flatmapping Python function FN to SELF."""
+        """Return a Scheme list after flatmapping Python function FN to SELF.
+        在对 SELF 进行 Python 函数 FN 的 flatmap（展平映射）后，返回一个 Scheme 列表。"""
         from scheme_builtins import scheme_append
         mapped = fn(self.first)
         if self.rest is nil or isinstance(self.rest, Pair):

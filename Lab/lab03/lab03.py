@@ -3,7 +3,8 @@ LAB_SOURCE_FILE = __file__
 
 def print_if(s, f):
     """Print each element of s for which f returns a true value.
-
+    打印 s 中每个使 f 返回真值的元素
+        
     >>> print_if([3, 4, 5, 6], lambda x: x > 4)
     5
     6
@@ -15,11 +16,13 @@ def print_if(s, f):
     """
     for x in s:
         "*** YOUR CODE HERE ***"
+        if f(x):
+            print(x)
 
 
 def close(s, k):
     """Return how many elements of s that are within k of their index.
-
+    返回 s 中有多少个元素与其索引的距离在 k 以内。
     >>> t = [6, 2, 4, 3, 5]
     >>> close(t, 0)  # Only 3 is equal to its index
     1
@@ -33,12 +36,14 @@ def close(s, k):
     count = 0
     for i in range(len(s)):  # Use a range to loop over indices
         "*** YOUR CODE HERE ***"
+        if abs(s[i]-i) <= k:
+            count += 1
     return count
 
 
 def close_list(s, k):
     """Return a list of the elements of s that are within k of their index.
-
+    返回 s 中与其索引的距离在 k 以内的元素组成的列表。
     >>> t = [6, 2, 4, 3, 5]
     >>> close_list(t, 0)  # Only 3 is equal to its index
     [3]
@@ -47,7 +52,7 @@ def close_list(s, k):
     >>> close_list(t, 2)  # 2, 3, 4, and 5 are all within 2 of their index
     [2, 4, 3, 5]
     """
-    return [___ for i in range(len(s)) if ___]
+    return [s[i] for i in range(len(s)) if abs(s[i]-i) <= k]
 
 
 from math import sqrt
@@ -55,7 +60,7 @@ from math import sqrt
 def squares(s):
     """Returns a new list containing square roots of the elements of the
     original list that are perfect squares.
-
+    返回一个新列表，其中包含原列表中那些为完全平方数的元素的平方根。
     >>> seq = [8, 49, 8, 9, 2, 1, 100, 102]
     >>> squares(seq)
     [7, 3, 1, 10]
@@ -63,13 +68,13 @@ def squares(s):
     >>> squares(seq)
     []
     """
-    return [___ for n in s if ___]
+    return [int(sqrt(n)) for n in s if sqrt(n) == round(sqrt(n))]
 
 
 def double_eights(n):
     """Returns whether or not n has two digits in row that
     are the number 8.
-
+    返回 n 是否有连续两位数字都是数字 8。禁止迭代
     >>> double_eights(1288)
     True
     >>> double_eights(880)
@@ -82,19 +87,28 @@ def double_eights(n):
     True
     >>> double_eights(78)
     False
-    >>> # ban iteration
+    >>> # ban iteration 
     >>> from construct_check import check
     >>> check(LAB_SOURCE_FILE, 'double_eights', ['While', 'For'])
     True
     """
     "*** YOUR CODE HERE ***"
+    if  n < 10 :
+        return False
+    elif n%100 == 88 :
+        return True
+    else:
+        return double_eights(n//10)
+    
 
 
 def make_onion(f, g):
     """Return a function can_reach(x, y, limit) that returns
     whether some call expression containing only f, g, and x with
     up to limit calls will give the result y.
-
+    返回一个函数 can_reach(x, y, limit)，它返回是否存在某个调用表达式，
+    该表达式仅包含 f、g 和 x,且在最多 limit 次调用的情况下会得到结果 y。
+    
     >>> up = lambda x: x + 1
     >>> double = lambda y: y * 2
     >>> can_reach = make_onion(up, double)
@@ -116,10 +130,10 @@ def make_onion(f, g):
     """
     def can_reach(x, y, limit):
         if limit < 0:
-            return ____
+            return False
         elif x == y:
-            return ____
+            return True
         else:
-            return can_reach(____, ____, limit - 1) or can_reach(____, ____, limit - 1)
+            return can_reach(f(x), y, limit - 1) or can_reach(g(x), y, limit - 1)
     return can_reach
 

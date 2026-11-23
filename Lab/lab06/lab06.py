@@ -1,16 +1,20 @@
-class Transaction:
+class Transaction:  #交易记录
     def __init__(self, id, before, after):
         self.id = id
         self.before = before
         self.after = after
 
     def changed(self):
-        """Return whether the transaction resulted in a changed balance."""
+        """Return whether the transaction resulted in a changed balance.
+        如果余额发生变化(before 和 after 不相等）返回真，否则返回假。"""
         "*** YOUR CODE HERE ***"
+        if self.before == self.after:
+            return False
+        return True
 
     def report(self):
         """Return a string describing the transaction.
-
+        返回一段描述这笔交易的字符串。字符串以交易编号开头，说明余额变动情况。可以参考文档测试示例
         >>> Transaction(3, 20, 10).report()
         '3: decreased 20->10'
         >>> Transaction(4, 20, 50).report()
@@ -21,11 +25,15 @@ class Transaction:
         msg = 'no change'
         if self.changed():
             "*** YOUR CODE HERE ***"
+            if self.before > self.after:
+                msg = 'decreased '+str(self.before)+'->'+str(self.after)
+            if self.before < self.after:
+                msg = 'increased '+str(self.before)+'->'+str(self.after)
         return str(self.id) + ': ' + msg
 
 class BankAccount:
     """A bank account that tracks its transaction history.
-
+    可追踪交易历史的银行账户
     >>> a = BankAccount('Eric')
     >>> a.deposit(100)    # Transaction 0 for a
     100
@@ -67,20 +75,34 @@ class BankAccount:
     def __init__(self, account_holder):
         self.balance = 0
         self.holder = account_holder
+        self.transactions = []
+        self.id = 0
 
     def deposit(self, amount):
         """Increase the account balance by amount, add the deposit
         to the transaction history, and return the new balance.
-        """
+        将账户余额增加amount，把本次存款记入交易记录，返回新余额"""
+        
+        tran = Transaction(self.id,self.balance,self.balance+amount)
+        self.transactions.append(tran)
+        self.id += 1
         self.balance = self.balance + amount
+        
         return self.balance
 
     def withdraw(self, amount):
         """Decrease the account balance by amount, add the withdraw
         to the transaction history, and return the new balance.
-        """
+        将账户余额减少amount，把本次取款记入交易记录，返回新余额"""
+        
         if amount > self.balance:
+            tran = Transaction(self.id,self.balance,self.balance)
+            self.transactions.append(tran)
+            self.id += 1
             return 'Insufficient funds'
+        tran = Transaction(self.id,self.balance,self.balance-amount)
+        self.transactions.append(tran)
+        self.id += 1
         self.balance = self.balance - amount
         return self.balance
 
@@ -94,12 +116,13 @@ class Email:
     """
     def __init__(self, msg, sender, recipient_name):
         self.msg = msg
-        self.sender = sender
+        self.sender = sender    #Client类实例
         self.recipient_name = recipient_name
 
 class Server:
     """Each Server has one instance attribute called clients that is a
     dictionary from client names to client objects.
+    每个 Server 有一个名为 clients 的实例属性，它是一个从 client 名字到 client 对象的字典。
     """
     def __init__(self):
         self.clients = {}
@@ -107,19 +130,24 @@ class Server:
     def send(self, email):
         """Append the email to the inbox of the client it is addressed to.
             email is an instance of the Email class.
+            将该电子邮件追加到它所寄往的 client 的收件箱
+            email 是 Email 类的一个实例
         """
-        ____.inbox.append(email)
+        self.clients[email.recipient_name].inbox.append(email)
 
     def register_client(self, client):
         """Add a client to the clients mapping (which is a 
         dictionary from client names to client instances).
             client is an instance of the Client class.
+        将一个 client 添加到 clients 映射中（该映射是一个从 client 名字到 client 实例的字典）。
+        client 是 Client 类的一个实例。
         """
-        ____[____] = ____
+        self.clients[client.name] = client
 
 class Client:
     """A client has a server, a name (str), and an inbox (list).
-
+    一个 client 有一个 server、一个名字（str）和一个收件箱（list）
+    
     >>> s = Server()
     >>> a = Client(s, 'Alice')
     >>> b = Client(s, 'Bob')
@@ -138,19 +166,21 @@ class Client:
         self.inbox = []
         self.server = server
         self.name = name
-        server.register_client(____)
+        server.register_client(self)
 
     def compose(self, message, recipient_name):
-        """Send an email with the given message to the recipient."""
-        email = Email(message, ____, ____)
+        """Send an email with the given message to the recipient.
+            发送一封带有给定消息的电子邮件给收件人"""
+        email = Email(message, self, recipient_name)
         self.server.send(email)
 
 
 class Mint:
     """A mint creates coins by stamping on years.
-
+    铸币厂通过盖上年份来制造硬币
     The update method sets the mint's stamp to Mint.present_year.
-
+    update 方法将铸币厂的年份戳设置为 Mint.present_year
+    
     >>> mint = Mint()
     >>> mint.year
     2024
@@ -182,9 +212,11 @@ class Mint:
 
     def create(self, coin):
         "*** YOUR CODE HERE ***"
+        return coin(self.year)
 
     def update(self):
         "*** YOUR CODE HERE ***"
+        self.year = Mint.present_year
 
 class Coin:
     cents = None # will be provided by subclasses, but not by Coin itself
@@ -194,6 +226,9 @@ class Coin:
 
     def worth(self):
         "*** YOUR CODE HERE ***"
+        if Mint.present_year-self.year > 50:
+            return self.cents+(Mint.present_year-self.year-50)
+        return self.cents
 
 class Nickel(Coin):
     cents = 5

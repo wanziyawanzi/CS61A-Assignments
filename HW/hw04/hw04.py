@@ -1,6 +1,6 @@
 def shuffle(s):
     """Return a shuffled list that interleaves the two halves of s.
-
+    返回一个打乱顺序的列表，该列表将 s 的两半交错排列。
     >>> shuffle(range(6))
     [0, 3, 1, 4, 2, 5]
     >>> letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -13,11 +13,19 @@ def shuffle(s):
     """
     assert len(s) % 2 == 0, 'len(seq) must be even'
     "*** YOUR CODE HERE ***"
-
+    n = len(s)
+    s0 = s[:n//2+1]
+    s1 = s[n//2:]
+    s2 = []
+    for i in range(n//2):
+        s2.append(s0[i])
+        s2.append(s1[i])
+    return s2 
 
 def deep_map(f, s):
     """Replace all non-list elements x with f(x) in the nested list s.
-
+    将嵌套列表 s 中所有非列表元素 x 替换为 f(x)
+    
     >>> six = [1, 2, [3, [4], 5], 6]
     >>> deep_map(lambda x: x * x, six)
     >>> six
@@ -38,20 +46,28 @@ def deep_map(f, s):
     True
     """
     "*** YOUR CODE HERE ***"
-
+    def g(f,s):
+        for i in range(len(s)):
+            if type(s[i]) != list:
+                s[i] = f(s[i])
+            else:
+                g(f,s[i])
+    g(f,s)
 
 HW_SOURCE_FILE=__file__
 
 
 def planet(mass):
-    """Construct a planet of some mass."""
+    """Construct a planet of some mass.构造一个具有某个质量的行星"""
     assert mass > 0
     "*** YOUR CODE HERE ***"
+    return ['planet',mass]
 
 def mass(p):
-    """Select the mass of a planet."""
+    """Select the mass of a planet.选择行星的质量"""
     assert is_planet(p), 'must call mass on a planet'
     "*** YOUR CODE HERE ***"
+    return p[1]
 
 def is_planet(p):
     """Whether p is a planet."""
@@ -104,12 +120,31 @@ def balanced(m):
     True
     """
     "*** YOUR CODE HERE ***"
-
+    def f(m):
+        if is_planet(m):
+            return True
+        else:
+            left_res = length(left(m))*total_mass(end(left(m)))
+            right_res = length(right(m))*total_mass(end(right(m)))    
+            if left_res != right_res:
+                return False
+            if is_mobile(end(left(m))):
+                if not f(end(left(m))):
+                    return False
+            if is_mobile(end(right(m))):
+                if not f(end(right(m))):
+                    return False
+            return True
+    if is_planet(m):
+        return True
+    else:
+        return f(m)
 
 def berry_finder(t):
     """Returns True if t contains a node with the value 'berry' and 
     False otherwise.
-
+    如果 t 包含值为 'berry' 的节点则返回 True,否则返回 False
+    
     >>> scrat = tree('berry')
     >>> berry_finder(scrat)
     True
@@ -124,13 +159,22 @@ def berry_finder(t):
     True
     """
     "*** YOUR CODE HERE ***"
+    if label(t) == 'berry':
+        return True
+    if is_leaf(t):
+        return False
+    else:
+        for b in branches(t):
+            if berry_finder(b):
+                return True
+        return False
 
 
 HW_SOURCE_FILE=__file__
 
 
 def max_path_sum(t):
-    """Return the maximum root-to-leaf path sum of a tree.
+    """Return the maximum root-to-leaf path sum of a tree.返回一棵树的最大根到叶路径和
     >>> t = tree(1, [tree(5, [tree(1), tree(3)]), tree(10)])
     >>> max_path_sum(t) # 1, 10
     11
@@ -139,10 +183,15 @@ def max_path_sum(t):
     17
     """
     "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        return label(t)
+    else:
+        return label(t) + max([max_path_sum(b) for b in branches(t)])
 
 
 def mobile(left, right):
-    """Construct a mobile from a left arm and a right arm."""
+    """Construct a mobile from a left arm and a right arm.
+    从左右臂构造一个活动雕塑"""
     assert is_arm(left), "left must be an arm"
     assert is_arm(right), "right must be an arm"
     return ['mobile', left, right]
@@ -162,7 +211,8 @@ def right(m):
     return m[2]
 
 def arm(length, mobile_or_planet):
-    """Construct an arm: a length of rod with a mobile or planet at the end."""
+    """Construct an arm: a length of rod with a mobile or planet at the end.
+    构造一个臂：一根长度为 length 的杆，末端有一个活动雕塑或行星"""
     assert is_mobile(mobile_or_planet) or is_planet(mobile_or_planet)
     return ['arm', length, mobile_or_planet]
 
@@ -176,7 +226,8 @@ def length(s):
     return s[1]
 
 def end(s):
-    """Select the mobile or planet hanging at the end of an arm."""
+    """Select the mobile or planet hanging at the end of an arm.
+    选择臂末端悬挂的活动雕塑或行星"""
     assert is_arm(s), "must call end on an arm"
     return s[2]
 
@@ -185,21 +236,23 @@ def end(s):
 # Tree Data Abstraction
 
 def tree(label, branches=[]):
-    """Construct a tree with the given label value and a list of branches."""
+    """Construct a tree with the given label value and a list of branches.
+    使用给定的标签值和分支列表构造一棵树"""
     for branch in branches:
         assert is_tree(branch), 'branches must be trees'
     return [label] + list(branches)
 
 def label(tree):
-    """Return the label value of a tree."""
+    """Return the label value of a tree.返回一棵树的标签值"""
     return tree[0]
 
 def branches(tree):
-    """Return the list of branches of the given tree."""
+    """Return the list of branches of the given tree.返回给定树的分支列表"""
     return tree[1:]
 
 def is_tree(tree):
-    """Returns True if the given tree is a tree, and False otherwise."""
+    """Returns True if the given tree is a tree, and False otherwise.
+    如果给定对象是一棵树，则返回 True,否则返回 False"""
     if type(tree) != list or len(tree) < 1:
         return False
     for branch in branches(tree):
@@ -209,14 +262,16 @@ def is_tree(tree):
 
 def is_leaf(tree):
     """Returns True if the given tree's list of branches is empty, and False
-    otherwise.
+    otherwise.如果给定树的分支列表为空，则返回 True,否则返回 False
     """
     return not branches(tree)
 
 def print_tree(t, indent=0):
     """Print a representation of this tree in which each node is
     indented by two spaces times its depth from the root.
-
+    打印这棵树的表示形式，其中每个节点按其距根节点的深度缩进，
+    深度每增加一层缩进两个空格
+    
     >>> print_tree(tree(1))
     1
     >>> print_tree(tree(1, [tree(2)]))
@@ -238,7 +293,8 @@ def print_tree(t, indent=0):
 
 def copy_tree(t):
     """Returns a copy of t. Only for testing purposes.
-
+    返回 t 的副本。仅用于测试目的
+    
     >>> t = tree(5)
     >>> copy = copy_tree(t)
     >>> t = tree(6)

@@ -2,7 +2,8 @@ def hailstone(n):
     """
     Yields the elements of the hailstone sequence starting at n.
     At the end of the sequence, yield 1 infinitely.
-
+    编写一个生成器函数，生成从数字 n 开始的冰雹序列的元素。
+    到达冰雹序列末尾后，生成器应无限地产出值 1
     >>> hail_gen = hailstone(10)
     >>> [next(hail_gen) for _ in range(10)]
     [10, 5, 16, 8, 4, 2, 1, 1, 1, 1]
@@ -10,13 +11,23 @@ def hailstone(n):
     1
     """
     "*** YOUR CODE HERE ***"
+    if n == 1:
+        while True:
+            yield 1
+    else:
+        yield n
+        if n%2 == 0:
+            yield from hailstone(n//2)
+        else:
+            yield from hailstone(3*n+1)
 
 
 def merge(a, b):
     """
     Return a generator that has all of the elements of generators a and b,
     in increasing order, without duplicates.
-
+    返回一个生成器，包含生成器 a 和 b 的所有元素，
+    按递增顺序排列，且没有重复
     >>> def sequence(start, step):
     ...     while True:
     ...         yield start
@@ -31,17 +42,23 @@ def merge(a, b):
     while True:
         if a_val == b_val:
             "*** YOUR CODE HERE ***"
+            yield a_val
+            a_val, b_val = next(a), next(b)
         elif a_val < b_val:
             "*** YOUR CODE HERE ***"
+            yield a_val
+            a_val = next(a)
         else:
             "*** YOUR CODE HERE ***"
+            yield b_val
+            b_val = next(b)
 
 
 def stair_ways(n):
     """
     Yield all the ways to climb a set of n stairs taking
     1 or 2 steps at a time.
-
+    产出爬 n 级楼梯、每次走 1 或 2 级台阶的所有方式
     >>> list(stair_ways(0))
     [[]]
     >>> s_w = stair_ways(4)
@@ -51,13 +68,35 @@ def stair_ways(n):
     []
     """
     "*** YOUR CODE HERE ***"
+    '''自己想的携带路径的递归，自底向下组合解
+    def f(n,ways):
+        if n == 0:
+            yield ways
+        elif n == 1:
+            yield ways+[1]
+        else:
+            yield from f(n-1,ways+[1])
+            yield from f(n-2,ways+[2])
+    yield from f(n,[])'''
+    '''从结果往回拼，假设子问题已解决，自顶向下构建解'''
+    if n == 0:
+        yield []
+    elif n == 1:
+        yield [1]
+    else:
+        for way in stair_ways(n-1):
+            yield [1]+way
+        for way in stair_ways(n-2):
+            yield [2]+way
 
 
 def yield_paths(t, value):
     """
     Yields all possible paths from the root of t to a node with the label
     value as a list.
-
+    它产出从 t 的根到任何标签为 value 的节点的每条路径。
+    每条路径应作为从根到匹配节点的标签列表返回。路径可以按任意顺序产出。
+    
     >>> t1 = tree(1, [tree(2, [tree(3), tree(4, [tree(6)]), tree(5)]), tree(5)])
     >>> print_tree(t1)
     1
@@ -88,12 +127,12 @@ def yield_paths(t, value):
     >>> sorted(list(path_to_2))
     [[0, 2], [0, 2, 1, 2]]
     """
+    '''枚举两样东西：每个分支 和 该分支里的每条路径'''
     if label(t) == value:
-        yield ____
+        yield [value]
     for b in branches(t):
-        for ____ in ____:
-            yield ____
-
+        for i in yield_paths(b,value):
+            yield [label(t)]+i
 
 
 # Tree Data Abstraction

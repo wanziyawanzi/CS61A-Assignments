@@ -1,7 +1,8 @@
 def cumulative_mul(t):
     """Mutates t so that each node's label becomes the product of its own
     label and all labels in the corresponding subtree rooted at t.
-
+    修改 t，使每个节点的标签变为其自身标签与以 t 为根的对应子树中所有标签的乘积
+    
     >>> t = Tree(1, [Tree(3, [Tree(5)]), Tree(7)])
     >>> cumulative_mul(t)
     >>> t
@@ -12,12 +13,27 @@ def cumulative_mul(t):
     Tree(5040, [Tree(60, [Tree(3), Tree(4), Tree(5)]), Tree(42, [Tree(7)])])
     """
     "*** YOUR CODE HERE ***"
-
+    def f(t):       #自上而下递归
+        cum = t.label
+        for b in t.branches:
+                cum *= f(b)
+        return cum
+    t.label = f(t) 
+    for b in t.branches:
+        if not b.is_leaf():
+            cumulative_mul(b)
+''' def f(t):        自底向上递归
+        total = t.label
+        for b in t.branches:
+            total *= f(b)   # 递归修改子树，并返回子树的乘积
+        t.label = total
+        return total
+    f(t)'''
 
 def prune_small(t, n):
     """Prune the tree mutatively, keeping only the n branches
     of each node with the smallest labels.
-
+    修改性地修剪树，每个节点只保留标签最小的 n 个分支
     >>> t1 = Tree(6)
     >>> prune_small(t1, 2)
     >>> t1
@@ -31,17 +47,20 @@ def prune_small(t, n):
     >>> t3
     Tree(6, [Tree(1), Tree(3, [Tree(1), Tree(2)])])
     """
-    while ____:
-        largest = max(____, key=____)
+    while len(t.branches) > n:
+        largest = max(t.branches, key=lambda b: b.label)
         t.branches.remove(largest)
     for b in t.branches:
-        ____
+        prune_small(b,n)
 
 
 def delete(t, x):
     """Remove all nodes labeled x below the root within Tree t. When a non-leaf
     node is deleted, the deleted node's children become children of its parent.
+    移除 Tree t 中根以下所有标签为 x 的节点。当删除一个非叶子节点时，
+    被删除节点的子节点成为其父节点的子节点。
 
+    根节点永远不会被移除
     The root node will never be removed.
 
     >>> t = Tree(3, [Tree(2, [Tree(2), Tree(2)]), Tree(2), Tree(2, [Tree(2, [Tree(2), Tree(2)])])])
@@ -58,13 +77,13 @@ def delete(t, x):
     Tree(1, [Tree(4), Tree(5), Tree(3, [Tree(6)]), Tree(6), Tree(7), Tree(8), Tree(4)])
     """
     new_branches = []
-    for _________ in ________________:
-        _______________________
+    for b in t.branches:
+        delete(b,x)
         if b.label == x:
-            __________________________________
+            new_branches.extend(b.branches)
         else:
-            __________________________________
-    t.branches = ___________________
+            new_branches.append(b)
+    t.branches = new_branches
 
 
 def max_path_sum(t):

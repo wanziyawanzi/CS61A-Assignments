@@ -1,4 +1,4 @@
-def digit(n, k):
+def digit(n, k):    #纯表达式+整数分解
     """Return the digit that is k from the right of n for positive integers n and k.
 
     >>> digit(3579, 2)
@@ -8,10 +8,10 @@ def digit(n, k):
     >>> digit(3579, 10)
     0
     """
-    return ____
+    return (n//(10**k))%10  
 
 
-def middle(a, b, c):
+def middle(a, b, c):     #把选择交给数学性质和内置函数
     """Return the number among a, b, and c that is not the smallest or largest.
     Assume a, b, and c are all different numbers.
 
@@ -26,10 +26,10 @@ def middle(a, b, c):
     >>> middle(30, 5, 40)
     30
     """
-    return ____
+    return a+b+c-min(a,b,c)-max(a,b,c)
 
 
-def falling(n, k):
+def falling(n, k):  #while 循环 + 累乘 + 边界处理
     """Compute the falling factorial of n to depth k.
 
     >>> falling(6, 3)  # 6 * 5 * 4
@@ -42,7 +42,11 @@ def falling(n, k):
     1
     """
     "*** YOUR CODE HERE ***"
-
+    i=0;m=1
+    while i!=k:
+        m=(n-i)*m
+        i+=1
+    return m
 
 def divisible_by_k(n, k):
     """
@@ -65,6 +69,13 @@ def divisible_by_k(n, k):
     0
     """
     "*** YOUR CODE HERE ***"
+    i=0;s=0
+    if n%k==0:      #生成序列 + 计数
+        while s!=n:
+            s=s+k
+            i+=1
+            print(s)
+    return i
 
 
 def sum_digits(y):
@@ -81,6 +92,15 @@ def sum_digits(y):
     6
     """
     "*** YOUR CODE HERE ***"
+    k=1;s=y%10      #从低往高，更加简单。while y > 0: s += y % 10; y //= 10
+    while y//(10**k) >0:    #逐位分解 + 累加
+        k+=1
+    k-=1
+    while k!=0:
+        s+=y//(10**k)
+        y=y-(y//(10**k))*(10**k)
+        k-=1        
+    return s
 
 
 def double_eights(n):
@@ -99,4 +119,20 @@ def double_eights(n):
     False
     """
     "*** YOUR CODE HERE ***"
+    k=1;s=0;x=0
+    if n<10:    #逐位扫描 + 相邻判断 + 提前返回
+        return False
+    else:
+        while n//(10**k) >0:
+            k+=1
+        k-=1
+        while k!=0:
+            s=n//(10**k)
+            n=n-s*(10**k)
+            k-=1
+            if s==8:
+                x=n//(10**k)
+                if x==8:
+                    return True
+        return False
 

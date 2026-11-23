@@ -11,6 +11,9 @@ from scheme_builtins import *
 # its first argument---a Scheme list representing a special form without the
 # initial identifying symbol (if, lambda, quote, ...). Its second argument is
 # the environment in which the form is to be evaluated.
+'''以下每个 do_xxx_form 函数都将一个特殊形式的 cdr 作为其第一个参数——这是一个表示特殊形式的 
+Scheme列表，其中去掉了开头的标识符号（如 if、lambda、quote 等）。
+其第二个参数是该形式要被求值时所处的环境'''
 
 def do_define_form(expressions, env):
     """Evaluate a define form.
@@ -37,11 +40,18 @@ def do_define_form(expressions, env):
         validate_form(expressions, 2, 2) # Checks that expressions is a list of length exactly 2
         # BEGIN PROBLEM 4
         "*** YOUR CODE HERE ***"
+        value = scheme_eval(expressions.rest.first,env)
+        env.define(signature,value)
+        return signature
         # END PROBLEM 4
     elif isinstance(signature, Pair) and scheme_symbolp(signature.first):
         # defining a named procedure e.g. (define (f x y) (+ x y))
         # BEGIN PROBLEM 10
         "*** YOUR CODE HERE ***"
+        name,formals = signature.first,signature.rest
+        proc = do_lambda_form(Pair(formals,expressions.rest),env)
+        env.define(name,proc)
+        return name
         # END PROBLEM 10
     else:
         bad_signature = signature.first if isinstance(signature, Pair) else signature
@@ -57,6 +67,7 @@ def do_quote_form(expressions, env):
     validate_form(expressions, 1, 1)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    return expressions.first
     # END PROBLEM 5
 
 def do_begin_form(expressions, env):
@@ -83,6 +94,7 @@ def do_lambda_form(expressions, env):
     validate_formals(formals)
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    return LambdaProcedure(expressions.first,expressions.rest,env)
     # END PROBLEM 7
 
 def do_if_form(expressions, env):
@@ -116,6 +128,15 @@ def do_and_form(expressions, env):
     """
     # BEGIN PROBLEM 12
     "*** YOUR CODE HERE ***"
+    if expressions is nil:
+        return True
+    value = scheme_eval(expressions.first,env)
+    if is_scheme_false(value):
+        return value
+    elif is_scheme_true(value) and expressions.rest is nil:
+        return value
+    else:
+        return do_and_form(expressions.rest,env)
     # END PROBLEM 12
 
 def do_or_form(expressions, env):
@@ -134,6 +155,15 @@ def do_or_form(expressions, env):
     """
     # BEGIN PROBLEM 12
     "*** YOUR CODE HERE ***"
+    if expressions is nil:
+        return False
+    val = scheme_eval(expressions.first,env)
+    if is_scheme_true(val):
+        return val
+    elif is_scheme_false(val) and expressions.rest is nil:
+        return val
+    else:
+        return do_or_form(expressions.rest,env)
     # END PROBLEM 12
 
 def do_cond_form(expressions, env):
@@ -150,10 +180,13 @@ def do_cond_form(expressions, env):
             if expressions.rest != nil:
                 raise SchemeError('else must be last')
         else:
-            test = scheme_eval(clause.first, env)
+            test = scheme_eval(clause.first, env)   #对谓词求值
         if is_scheme_true(test):
             # BEGIN PROBLEM 13
             "*** YOUR CODE HERE ***"
+            if clause.rest != nil:
+                return eval_all(clause.rest,env)
+            else: return test
             # END PROBLEM 13
         expressions = expressions.rest
 
@@ -172,12 +205,25 @@ def make_let_frame(bindings, env):
     """Create a child frame of Frame ENV that contains the definitions given in
     BINDINGS. The Scheme list BINDINGS must have the form of a proper bindings
     list in a let expression: each item must be a list containing a symbol
-    and a Scheme expression."""
+    and a Scheme expression.
+    创建一个 Frame ENV 的子帧，其中包含 BINDINGS 中给出的定义。Scheme 列表 BINDINGS
+    必须具有 let 表达式中正确的绑定列表形式：每个项都必须是一个包含一个符号和一个 
+    Scheme 表达式的列表。"""
+    
     if not scheme_listp(bindings):
         raise SchemeError('bad bindings list in let form')
     names = vals = nil
     # BEGIN PROBLEM 14
     "*** YOUR CODE HERE ***"
+    expr = bindings
+    while expr is not nil:
+        validate_form(expr.first,2,2)
+        #names = Pair(expr.first.first,names)
+        #vals = Pair(eval_all(expr.first.rest,env),vals)
+        expr = expr.rest
+    names = bindings.map(lambda a: a.first)
+    validate_formals(names)
+    vals = bindings.map(lambda b:scheme_eval(b.rest.first,env))
     # END PROBLEM 14
     return env.make_child_frame(names, vals)
 
@@ -185,10 +231,13 @@ def make_let_frame(bindings, env):
 
 def do_quasiquote_form(expressions, env):
     """Evaluate a quasiquote form with parameters EXPRESSIONS in
-    Frame ENV."""
+    Frame ENV.在环境帧 ENV 中对带有参数 EXPRESSIONS 的 quasiquote 形式进行求值。"""
     def quasiquote_item(val, env, level):
         """Evaluate Scheme expression VAL that is nested at depth LEVEL in
-        a quasiquote form in Frame ENV."""
+        a quasiquote form in Frame ENV.
+        在环境帧 ENV 中，对嵌套在准引用（quasiquote）形式中深度为 LEVEL 处的 Scheme 
+        表达式 VAL 进行求值。"""
+        
         if not scheme_pairp(val):
             return val
         if val.first == 'unquote':
@@ -220,6 +269,7 @@ def do_mu_form(expressions, env):
     validate_formals(formals)
     # BEGIN PROBLEM 11
     "*** YOUR CODE HERE ***"
+    return MuProcedure(expressions.first,expressions.rest)
     # END PROBLEM 11
 
 

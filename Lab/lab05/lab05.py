@@ -3,7 +3,8 @@ HW_SOURCE_FILE=__file__
 
 def insert_items(s, before, after):
     """Insert after into s after each occurrence of before and then return s.
-
+    在每个 before 出现之后将 after 插入 s,然后返回 s
+    
     >>> test_s = [1, 5, 8, 5, 2, 3]
     >>> new_s = insert_items(test_s, 5, 7)
     >>> new_s
@@ -27,32 +28,41 @@ def insert_items(s, before, after):
     True
     """
     "*** YOUR CODE HERE ***"
+    i = 0
+    while i < len(s):
+        if s[i] == before:
+            s.insert(i+1,after)
+            i += 2
+        else: i += 1
+    return s     
 
 
 def group_by(s, fn):
     """Return a dictionary of lists that together contain the elements of s.
     The key for each list is the value that fn returns when called on any of the
     values of that list.
-
+    返回一个字典，其中的值都是列表，这些列表合在一起包含 s 中的所有元素。
+    每个列表对应的键，是将 fn 作用于该列表中的任意一个元素时返回的值
+    
     >>> group_by([12, 23, 14, 45], lambda p: p // 10)
     {1: [12, 14], 2: [23], 4: [45]}
     >>> group_by(range(-3, 4), lambda x: x * x)
     {9: [-3, 3], 4: [-2, 2], 1: [-1, 1], 0: [0]}
     """
     grouped = {}
-    for ____ in ____:
-        key = ____
+    for item in s:
+        key = fn(item)
         if key in grouped:
-            ____
+            grouped[key].append(item)
         else:
-            grouped[key] = ____
+            grouped[key] = [item]
     return grouped
 
 
 def count_occurrences(t, n, x):
     """Return the number of times that x is equal to one of the
     first n elements of iterator t.
-
+    返回 `x` 等于迭代器 `t` 的前 `n` 个元素之一的次数。
     >>> s = iter([10, 9, 10, 9, 9, 10, 8, 8, 8, 7])
     >>> count_occurrences(s, 10, 9)
     3
@@ -71,12 +81,18 @@ def count_occurrences(t, n, x):
     2
     """
     "*** YOUR CODE HERE ***"
+    return sum(1 for _ in range(n) if next(t) == x)
+    '''cnt = 0
+    for _ in range(n):
+        if next(t) == x:
+            cnt += 1
+    return cnt'''
 
 
 def repeated(t, k):
     """Return the first value in iterator t that appears k times in a row,
     calling next on t as few times as possible.
-
+    返回迭代器 `t` 中第一个连续出现 `k` 次的值，并尽可能少地调用 `next(t)`。
     >>> s = iter([10, 9, 10, 9, 9, 10, 8, 8, 8, 7])
     >>> repeated(s, 2)
     9
@@ -94,12 +110,22 @@ def repeated(t, k):
     """
     assert k > 1
     "*** YOUR CODE HERE ***"
+    cnt = 1
+    last_e = next(t)
+    for e in t:
+        if e == last_e:
+            cnt += 1
+        else: 
+            cnt = 1
+            last_e = e
+        if cnt == k:
+            return e
 
 
 def sprout_leaves(t, leaves):
     """Sprout new leaves containing the labels in leaves at each leaf of
     the original tree t and return the resulting tree.
-
+    在原树 `t` 的每个叶子处萌发出包含 `leaves` 中标签的新叶子，并返回生成的树。
     >>> t1 = tree(1, [tree(2), tree(3)])
     >>> print_tree(t1)
     1
@@ -135,7 +161,7 @@ def sprout_leaves(t, leaves):
 def partial_reverse(s, start):
     """Reverse part of a list in-place, starting with start up to the end of
     the list.
-
+    就地反转列表的一部分，从 `start` 开始一直到列表末尾。
     >>> a = [1, 2, 3, 4, 5, 6, 7]
     >>> partial_reverse(a, 2)
     >>> a

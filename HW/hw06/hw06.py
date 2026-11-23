@@ -12,7 +12,9 @@ def midsem_survey(p):
 
 class VendingMachine:
     """A vending machine that vends some product for some price.
-
+    一台以某个价格销售单一产品的自动售货机
+    实例对象的方法返回字符串来描述机器的状态和操作
+    
     >>> v = VendingMachine('candy', 10)
     >>> v.vend()
     'Nothing left to vend. Please restock.'
@@ -48,45 +50,70 @@ class VendingMachine:
     'Here is your soda.'
     """
     def __init__(self, product, price):
-        """Set the product and its price, as well as other instance attributes."""
+        """Set the product and its price, as well as other instance attributes.
+        设置产品及其价格，以及其他实例属性"""
         "*** YOUR CODE HERE ***"
+        self.name = product
+        self.price = price
+        self.num = 0
+        self.cur_balance = 0
 
     def restock(self, n):
         """Add n to the stock and return a message about the updated stock level.
-
+        向库存添加 n，并返回一条关于更新后库存水平的消息
         E.g., Current candy stock: 3
         """
         "*** YOUR CODE HERE ***"
+        self.num += n
+        return f'Current {self.name} stock: {self.num}'
 
     def add_funds(self, n):
         """If the machine is out of stock, return a message informing the user to restock
         (and return their n dollars).
-
+        如果机器缺货，返回一条消息通知用户补货（并退还他们的 n 美元）
         E.g., Nothing left to vend. Please restock. Here is your $4.
 
         Otherwise, add n to the balance and return a message about the updated balance.
-
+        否则，将 n 添加到余额中，并返回一条关于更新后余额的消息
         E.g., Current balance: $4
         """
         "*** YOUR CODE HERE ***"
+        if self.num == 0:
+            return f'Nothing left to vend. Please restock. Here is your ${n}.'
+        else: 
+            self.cur_balance = self.cur_balance + n
+            return f'Current balance: ${self.cur_balance}'
 
     def vend(self):
         """Dispense the product if there is sufficient stock and funds and
         return a message. Update the stock and balance accordingly.
-
+        如果有足够的库存和资金，则分发产品并返回一条消息。相应地更新库存和余额
         E.g., Here is your candy and $2 change.
 
         If not, return a message suggesting how to correct the problem.
-
+        如果没有，则返回一条建议如何纠正问题的消息
         E.g., Nothing left to vend. Please restock.
               Please add $3 more funds.
         """
         "*** YOUR CODE HERE ***"
+        if self.num == 0:
+            return 'Nothing left to vend. Please restock.'
+        elif self.cur_balance < self.price:
+            return f'Please add ${self.price - self.cur_balance} more funds.'
+        elif self.cur_balance > self.price:
+            self.num -= 1
+            money = self.cur_balance - self.price
+            self.cur_balance = 0
+            return f'Here is your {self.name} and ${money} change.'
+        else:
+            self.num -= 1
+            self.cur_balance = 0
+            return f'Here is your {self.name}.'
 
 
 def store_digits(n):
     """Stores the digits of a positive number n in a linked list.
-
+    接收一个整数 n，并返回一个链表，其中包含 n 的数字，顺序相同（从左到右）
     >>> s = store_digits(1)
     >>> s
     Link(1)
@@ -104,13 +131,23 @@ def store_digits(n):
     >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+    #Link 第一个参数必须是元素，不是链表,需要额外变量维护“已经构建好的链表”
+    acc = Link.empty
+    while n > 0:
+        digit = n % 10
+        acc = Link(digit,acc)
+        n = n // 10
+    return acc
 
 
 def deep_map_mut(func, s):
     """Mutates a deep link s by replacing each item found with the
     result of calling func on the item. Does NOT create new Links (so
     no use of Link's constructor).
-
+    将函数 func 应用于链表 s 中的每个元素。如果某个元素本身是一个链表，则递归地将 func 应用于其元素。
+    你的实现应该修改原始链表。不要创建任何新的链表。该函数返回 None。
+    提示：你可以使用内置的 isinstance 函数来判断一个元素是否为链表。
+    
     Does not return the modified Link object.
 
     >>> link1 = Link(3, Link(Link(4), Link(5, Link(6))))
@@ -126,6 +163,13 @@ def deep_map_mut(func, s):
     <9 <16> 25 36>
     """
     "*** YOUR CODE HERE ***"
+    if s is not Link.empty:
+        if isinstance(s.first,Link):
+            deep_map_mut(func,s.first)
+        else:
+            s.first = func(s.first)
+        deep_map_mut(func,s.rest)
+    return None
 
 
 def two_list(vals, counts):

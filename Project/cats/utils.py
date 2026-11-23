@@ -14,7 +14,8 @@ def lines_from_file(path):
 
 def remove_punctuation(s):
     """Return a string with the same contents as s, but with punctuation removed.
-
+    返回一个与 `s` 内容相同的字符串，但去除了标点符号
+    
     >>> remove_punctuation("It's a lovely day, don't you think?")
     'Its a lovely day dont you think'
     >>> remove_punctuation("Its a lovely day dont you think")
@@ -38,7 +39,8 @@ def lower(s):
 def split(s):
     """Return a list of words contained in s, which are sequences of characters
     separated by whitespace (spaces, tabs, etc.).
-
+    返回 `s` 中包含的单词列表，这些单词是由空白字符（空格、制表符等）分隔的字符序列
+    
     >>> split("It's a lovely day, don't you think?")
     ["It's", 'a', 'lovely', 'day,', "don't", 'you', 'think?']
     """
